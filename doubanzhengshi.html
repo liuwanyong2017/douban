@@ -233,7 +233,7 @@
                 setData(ret.subjects)
                 index += 20
                 unloading()
-                if (ret.subjects.length < 20) {
+                if (ret.subjects.length === 0) {
                     $('.remind').css('display', 'block')
                     setTimeout(function() {
                         $('.remind').css('display', 'none')
@@ -335,8 +335,9 @@
 
             })
         }
-        var ind = 0
+        var ind 
         $('section button').click(function() {
+            ind =0
             $('section').eq(2).find('div').eq(0).siblings().remove()
             startsearch()
         })
@@ -360,6 +361,12 @@
                 setDatasearch(ret.subjects)
                 ind += 20
                 unloading()
+                 if (ret.subjects.length === 0) {
+                    $('.remind').css('display', 'block')
+                    setTimeout(function() {
+                        $('.remind').css('display', 'none')
+                    }, 2000)
+                }
             }).fail(function() {
                 console.log('error...')
             }).always(function() {
