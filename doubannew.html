@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>豆瓣电影</title>
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.js"></script>
+    <meta name="referrer" content="no-referrer">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_442816_agigd754ffzgp66r.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html,
+        body {
+            height: 100%;
+        }
+        
+        body {
+            font-size: 12px;
+            line-height: 1.2;
+            background: #fff;
+            position: relative;
+        }
+        
+        main {
+            height: calc(100vh - 45px);
+            overflow: scroll;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+        }
+        
+        footer {
+            position: absolute;
+            width: 100%;
+            display: flex;
+            bottom: 0;
+            border-top: 1px solid #ccc;
+        }
+        
+        footer>div {
+            flex: 1;
+            text-align: center;
+        }
+        
+        footer>div.active {
+            color: #FF5722
+        }
+        
+        footer span {
+            display: block;
+            padding-top: 5px;
+        }
+        
+        main>section {
+            display: none;
+            border-top: 1px solid #ccc;
+        }
+        
+        main>section:first-child {
+            display: block;
+        }
+        
+        section>div {
+            border-bottom: 1px solid #ccc;
+            margin: 10px;
+            line-height: 1.5;
+            padding-bottom: 5px;
+        }
+        
+        section img {
+            float: left;
+            height: 110px;
+            width: 70px;
+        }
+        
+        section h2 {
+            margin-left: 85px;
+            color: black;
+        }
+        
+        section .score {
+            color: #FF5722;
+        }
+        
+        section .mes {
+            margin-left: 85px;
+            color: #bbb;
+        }
+        
+        a {
+            text-decoration: none;
+            display: block;
+        }
+        
+        .clearfix:after {
+            content: '';
+            clear: both;
+            display: block;
+        }
+        
+        .icon-loading {
+            position: absolute;
+            font-size: 20px;
+            bottom: 0;
+            left: 50% - 10px;
+            display: none;
+        }
+        
+        section input {
+            width: calc(99% - 60px);
+            padding: 10px 0;
+            border: 1px solid #aaa;
+            background: #ccc;
+            outline: none;
+            font-size: 20px;
+        }
+        
+        section button {
+            padding: 8px;
+            background: red;
+            outline: none;
+            font-size: 20px;
+            border: none;
+            float: right;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <section>
+
+        </section>
+        <section></section>
+        <section>
+            <div style="height:80px;">
+                <input type="text" name="keyword" placeholder="搜索电影">
+                <button>搜索</button>
+
+
+            </div>
+
+        </section>
+        <span class="iconfont icon-loading"></span>
+    </main>
+    <footer>
+        <div class="top active">
+            <span class="iconfont icon-toporder"></span>
+            <span>top250</span>
+        </div>
+        <div class="us">
+            <span class="icon-us iconfont"></span>
+            <span>北美排行</span>
+        </div>
+        <div class="search">
+            <span class="icon-search iconfont"></span>
+            <span>搜索</span>
+        </div>
+
+    </footer>
+    <script>
+        $("footer>div").click(function() {
+            var index = $(this).index()
+            $('section').hide().eq(index).fadeIn()
+            $(this).addClass('active').siblings().removeClass('active')
+        })
+
+
+        $('main').scroll(
+            function() {
+                var index = $('footer .active').index()
+                if ($('main').scrollTop() + $('main').height() >= $('section').eq(index).height() - 10) {
+                    if (index == 0) {
+                        start()
+                    } else if (index == 2) {
+                        startsearch()
+                    }
+                }
+            })
+
+
+        var index = 0
+
+        function start() {
+            $.ajax({
+                url: 'http://api.douban.com/v2/movie/top250',
+                mesold: 'GET',
+                data: {
+                    start: index,
+                    count: 20
+                },
+                dataType: 'jsonp'
+            }).done(function(ret) {
+                console.log(ret.subjects)
+                setData(ret.subjects)
+                index += 20
+            }).fail({
+                function() {
+                    console.log('error...')
+                }
+            })
+        }
+        start()
+
+        function startus() {
+            $.ajax({
+                url: 'http://api.douban.com/v2/movie/us_box',
+                mesold: 'GET',
+                dataType: 'jsonp'
+            }).done(function(ret) {
+                console.log(ret.subjects)
+                setDataus(ret.subjects)
+            }).fail({
+                function() {
+                    console.log('error...')
+                }
+            })
+        }
+
+        function setDataus(data) {
+            data.forEach(function(movie) {
+
+                build(movie.subject, 1)
+
+
+
+            })
+        }
+        startus()
+
+        function build(movie, ind) {
+            var tpl = `<div class="item">
+                    <a href="" class="clearfix">
+                    <img src="http://img7.doubanio.com/view/movie_poster_cover/spst/public/p480747492.jpg" alt="">
+                    <h2>霸王别姬</h2>
+                    <div class="mes">
+                        <span class="score">9.0分</span>
+                        <span>&nbsp/&nbsp</span>
+                        <span class="collect">1113234收藏</span>
+                    </div>
+                    <div class="mes">
+                        <span class="year">1994</span>
+                        <sapn>&nbsp/&nbsp</span>
+                        <span class="type">  剧情 / 动作/ 犯罪 </span>
+                    </div>
+                    <div class="mes">
+                        导演：<span class="director">就死按建设</span>
+                    </div>
+                    <div class="mes">
+                        主演：<span class="actor">张国荣 、 张丰毅 、巩俐 、葛优 </span>
+                    </div>
+                </a>
+                </div>`
+            var $node = $(tpl)
+            $node.find('a >img').attr('src', movie.images.medium)
+            $node.find('a').attr('href', movie.alt)
+            $node.find('a>h2').text(movie.title)
+            $node.find('a .score').text(movie.rating.average + '分')
+            $node.find('a .collect').text(movie.collect_count + '收藏')
+            $node.find('a .year').text(movie.year)
+            $node.find('a .type').text(movie.genres.join(' / '))
+            $node.find('a .director').text(function() {
+                var arr = []
+                movie.directors.forEach(function(obj) {
+                    arr.push(obj.name)
+                    return arr
+                })
+                return arr.join('、 ')
+            })
+            $node.find('a .actor').text(function() {
+                var arr = []
+                movie.casts.forEach(function(obj) {
+                    arr.push(obj.name)
+                    return arr
+                })
+                return arr.join('、 ')
+            })
+            $('section').eq(ind).append($node)
+        }
+
+        function setData(data) {
+            console.log(data)
+            data.forEach(function(movie) {
+
+                build(movie, 0)
+
+
+
+            })
+        }
+        var ind = 0
+        $('section button').click(function() {
+            startsearch()
+        })
+
+        function startsearch() {
+            $.ajax({
+                url: 'http://api.douban.com/v2/movie/search?q={text}',
+                mesold: 'GET',
+                data: {
+                    start: ind,
+                    count: 20,
+                    tag: $('section input').val()
+
+                },
+                dataType: 'jsonp'
+            }).done(function(ret) {
+                console.log(ret.subjects)
+                setDatasearch(ret.subjects)
+                ind += 20
+            }).fail({
+                function() {
+                    console.log('error...')
+                }
+            })
+        }
+
+        function setDatasearch(data) {
+            data.forEach(function(movie) {
+
+                build(movie, 2)
+
+
+
+            })
+        }
+    </script>
+</body>
+
+</html>
