@@ -260,10 +260,8 @@
             },
             bind: function() {
                 var self = this
-                this.$box.scroll(function() {
-                    if (self.isbottom()) {
-                        self.start()
-                    }
+                this.$box.on('show0',function(){
+                    self.start()
                 })
             },
             start: function() {
@@ -299,10 +297,6 @@
                     self.$container.append(build(movie))
                 })
             },
-            isbottom: function() {
-                console.log(this.$box.height() + this.$box.scrollTop() + 5 >= this.$container.height())
-                return this.$box.height() + this.$box.scrollTop() + 5 >= this.$container.height()
-            }
         }
         var us = {
             init: function() {
@@ -347,14 +341,12 @@
                     self.$container.find('div').eq(0).siblings().remove()
                     self.start()
                 })
-                this.$box.scroll(function() {
-                    if (self.isbottom()) {
-                        self.start()
-                    }
-                })
+                self.$box.on('show2',function(){
+                    self.start()
+                })             
             },
             start: function() {
-                
+                if(!this.$input.val()) return;
                 var self = this
                 if (self.isloading) return;
                 self.isloading = true
@@ -386,27 +378,37 @@
                     self.$container.append(build(movie))
                 })
             },
-            isbottom: function() {
-                console.log(this.$box.height() + this.$box.scrollTop() + 10 >= this.$container.height())
-                return this.$box.height() + this.$box.scrollTop() + 5 >= this.$container.height()
-            }
         }
         var app = {
             init: function() {
                 this.$tabs = $('footer > div')
                 this.$panels = $('section')
+                this.$box = $('main')
+                this.$container = $('section').eq(0)
+                this.index = 0
                 top250.init()
                 us.init()
                 search.init()
                 this.bind()
             },
             bind: function() {
-                var self = this
-                this.$tabs.on('click', function() {
-                    var index = $(this).index()
-                    self.$panels.eq(index).fadeIn().siblings().hide()
-                    $(this).addClass('active').siblings().removeClass('active')
-                })
+                    var self = this
+                    this.$tabs.on('click', function() {
+                        self.index = $(this).index()
+                        self.$container = self.$panels.eq(self.index)
+                        self.$panels.eq(self.index).fadeIn().siblings().hide()
+                        $(this).addClass('active').siblings().removeClass('active')
+                    })
+                    this.$box.scroll(function() {
+                        if (self.isbottom()) {
+                            self.$box.trigger('show'+self.index)
+                        }
+                    })
+
+            },
+            isbottom: function() {
+                console.log(this.$box.height() + this.$box.scrollTop() + 10 >= this.$container.height())
+                return this.$box.height() + this.$box.scrollTop() + 5 >= this.$container.height()
             }
         }
         app.init()
